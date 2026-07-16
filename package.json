@@ -2,11 +2,11 @@
   "name": "skillsprint-backend",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "dist/app.js",
   "scripts": {
-    "dev": "ts-node-dev --respawn --transpile-only src/app.ts",
-    "start": "node dist/index.js",
-    "build": "tsc -p tsconfig.json",
+    "dev": "ts-node-dev --respawn --transpile-only -r tsconfig-paths/register src/app.ts",
+    "start": "node dist/app.js",
+    "build": "tsc -p tsconfig.json && tsc-alias",
     "lint": "eslint .",
     "format": "prettier --write \"src/**/*.ts\"",
     "test": "vitest run",
@@ -36,6 +36,7 @@
     "zod": "^4.4.3"
   },
   "devDependencies": {
+    "@eslint/js": "^10.0.1",
     "@types/bcrypt": "^6.0.0",
     "@types/cookie-parser": "^1.4.10",
     "@types/cors": "^2.8.19",
@@ -45,6 +46,7 @@
     "@types/node": "^26.0.1",
     "@types/supertest": "^7.2.1",
     "eslint": "^10.7.0",
+    "eslint-config-prettier": "^10.1.8",
     "mongodb-memory-server": "^11.2.0",
     "prettier": "^3.9.5",
     "supertest": "^7.2.2",
@@ -53,6 +55,7 @@
     "tsconfig-paths": "^4.2.0",
     "tsx": "^4.22.4",
     "typescript": "^6.0.3",
+    "typescript-eslint": "^8.64.0",
     "vitest": "^4.1.10"
   }
 }

@@ -26,7 +26,12 @@ const userSchema = new Schema(
 // Strip sensitive/internal fields from any JSON response
 userSchema.set("toJSON", {
   transform: (_doc, ret) => {
-    const { passwordHash: _p, refreshTokenHashes: _r, __v: _v, ...sanitized } = ret as Record<string, unknown>;
+    const {
+      passwordHash: _p,
+      refreshTokenHashes: _r,
+      __v: _v,
+      ...sanitized
+    } = ret as Record<string, unknown>;
     return sanitized;
   },
 });
