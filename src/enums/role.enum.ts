@@ -1,1 +1,0 @@
-export const Role = ["student", "instructor", "admin"] as const;
