@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   x▢▢▢▢▢▢▢▢▢▢▢▢              1/13
+Phase 0  Setup & Foundation   xx▢▢▢▢▢▢▢▢▢▢▢              2/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -58,7 +58,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 2 — Solution and projects
 
-- [ ] **Do:** `dotnet new sln -n SkillSprint`, then create the four `src` projects and two `tests`
+- [x] **Do:** `dotnet new sln -n SkillSprint`, then create the four `src` projects and two `tests`
       projects listed in §2.2 and add them all to the solution.
 - **Roadmap:** §2.2
 - **Concept:** What a `.sln` actually is — a build grouping, not a compilation unit. Each `.csproj` is
