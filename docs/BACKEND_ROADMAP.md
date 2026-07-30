@@ -52,6 +52,7 @@ Note that `id` is a **slug** like `"intro-to-javascript"`, not a database identi
 | Validation     | FluentValidation                       | Composable, expressive rules kept out of the DTOs themselves          |
 | Logging        | Serilog                                | Structured JSON logs + per-request enrichment                         |
 | Testing        | xUnit + `WebApplicationFactory`        | In-process integration tests without binding a real port              |
+| Containers     | Docker + Compose (multi-stage)         | No local Mongo install; you deploy the image you tested               |
 | Repo layout    | Separate repo (`skillsprint-backend`)  | Independent deploys; clean separation of concerns                     |
 
 > **Historical note.** This API was originally scaffolded in TypeScript on Node/Express with
@@ -86,7 +87,14 @@ dotnet --list-sdks     # expect a 10.0.x entry
 ```
 
 Install the .NET 10 SDK if it is missing (`winget install Microsoft.DotNet.SDK.10` on Windows).
-A local MongoDB on `mongodb://localhost:27017` is needed to run the API; the tests spin up their own.
+
+**Docker Desktop** is the second prerequisite. The database comes from a container rather than a
+local install — `docker compose up -d mongo` is all it takes (§11). A locally installed MongoDB still
+works if you prefer one; only the connection string differs. The tests spin up their own database and
+need **no** Docker daemon at all (§12).
+
+> If `dotnet run` fails with a Mongo connection timeout, the cause is almost always Docker Desktop
+> not being started.
 
 ### 2.2 Solution & projects
 
@@ -134,12 +142,17 @@ Two files at the repo root do what `tsconfig.json` used to:
 
 | Task | Command |
 | --- | --- |
+| Start MongoDB | `docker compose up -d mongo` |
+| Stop it (keeps data) | `docker compose down` |
+| Stop it and wipe data | `docker compose down -v` |
+| Tail Mongo logs | `docker compose logs -f mongo` |
 | Run the API | `dotnet run --project src/SkillSprint.Api` |
 | Run with hot reload | `dotnet watch --project src/SkillSprint.Api` |
 | Build everything | `dotnet build` |
 | Test | `dotnet test` |
 | Format | `dotnet format` |
 | Seed the database | `dotnet run --project src/SkillSprint.Api -- seed` |
+| Run the whole stack in containers | `docker compose --profile full up --build` |
 
 ### 2.6 Configuration & secrets
 
@@ -177,6 +190,14 @@ Settings surface:
 
 In production, every one of these can be overridden by an environment variable using `__` as the
 section separator (`Mongo__ConnectionString`), which is how hosting platforms inject them.
+
+⚠️ **The connection string depends on where the code is running.** From the **host** (`dotnet run`,
+`dotnet watch`) Mongo is at `mongodb://localhost:27017`, which is the committed default above. From
+**inside a container** on the Compose network it is `mongodb://mongo:27017` — the Compose service
+name is the DNS name, and `localhost` inside a container means *that container*, not your machine.
+This is the single most common Docker-plus-Mongo failure. No `appsettings.json` change is needed for
+it: Compose sets `Mongo__ConnectionString` as an environment variable on the `api` service, using
+exactly the `__` override mechanism described above (§11).
 
 ---
 
@@ -222,7 +243,11 @@ skillsprint-backend/
 ├── global.json                  # pin the SDK to 10.0.x
 ├── Directory.Build.props        # net10.0, nullable, warnings-as-errors
 ├── .editorconfig
+├── Dockerfile                   # multi-stage: SDK builds, aspnet runs
+├── .dockerignore                # keep bin/, obj/, .git out of the build context
+├── compose.yaml                 # mongo (default) + api (profile: full)
 ├── docs/BACKEND_ROADMAP.md      # this file
+├── docs/BUILD_CHECKLIST.md      # the day-by-day execution view of §13
 ├── src/
 │   ├── SkillSprint.Domain/            # → references nothing
 │   │   ├── Common/MongoDocument.cs    #    shared Id + timestamps
@@ -466,7 +491,7 @@ public sealed record CourseDto(
 
 > **Sharing types with the frontend:** the two sides are no longer the same language, so a shared npm
 > package of types is off the table. The equivalent is to **generate a TypeScript client from the
-> OpenAPI document** the API already publishes (§11) — the contract is still compiler-checked on both
+> OpenAPI document** the API already publishes (§12) — the contract is still compiler-checked on both
 > ends, just derived rather than shared.
 
 ---
@@ -705,7 +730,127 @@ Frontend changes needed:
 
 ---
 
-## 11. Extras Worth Including
+## 11. Containerization
+
+### 11.1 Two jobs, two phases
+
+Docker does one thing in Phase 0 and a different thing in Phase 5, and it helps to keep them apart:
+
+- **Phase 0 — supply MongoDB.** `docker compose up -d mongo` replaces installing a database on your
+  machine. This is the only thing Docker does for most of the build.
+- **Phase 5 — package the API.** A multi-stage `Dockerfile` produces the artifact you actually deploy.
+
+Note what is *not* on that list: the API is **not** containerized for day-to-day development.
+`dotnet watch` on the host rebuilds in under a second; a bind-mounted container loop does not. Run
+the database in a container and the app you are editing on the host.
+
+### 11.2 `compose.yaml` — the dev database
+
+- Use the Compose Spec, so **no `version:` key**. It has been obsolete for years and current Compose
+  warns about it — most tutorials you'll find still have it.
+- Pin `mongo` to an explicit major version, never `:latest`, so a rebuild months from now doesn't
+  quietly hand you a different server. Map `27017:27017`.
+- Give it a **named volume** for `/data/db`. Without one, every `docker compose down` is an empty
+  database and you re-run the seeder; with one, only `down -v` discards data.
+- Add a `healthcheck` running `mongosh --eval "db.adminCommand('ping')"`. It costs nothing now and
+  Phase 5 depends on it existing.
+- The `api` service is added in Phase 5 behind `profiles: [full]`, so the plain `docker compose up`
+  you've been typing since Phase 0 keeps starting Mongo alone.
+
+### 11.3 The Dockerfile — multi-stage
+
+Build with the SDK image, ship with the runtime image:
+
+- Build stage: `mcr.microsoft.com/dotnet/sdk:10.0`.
+- Runtime stage: `mcr.microsoft.com/dotnet/aspnet:10.0`, or `10.0-noble-chiseled` for a much smaller,
+  shell-less image. The SDK is roughly ten times the size of the runtime and has no business in the
+  shipped image.
+
+**Layer caching is the whole trick.** Copy the files that describe *dependencies* first, restore, and
+only then copy the source:
+
+```dockerfile
+FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+WORKDIR /src
+COPY global.json Directory.Build.props SkillSprint.sln ./
+COPY src/SkillSprint.Domain/*.csproj          src/SkillSprint.Domain/
+COPY src/SkillSprint.Application/*.csproj     src/SkillSprint.Application/
+# … one line per project …
+RUN dotnet restore
+COPY . .
+RUN dotnet publish src/SkillSprint.Api -c Release -o /app/publish
+```
+
+`restore` is the slow step. Ordered this way it re-runs only when a project file changes, not on
+every source edit. Note `publish`, not `build` — the runtime stage copies `/app/publish` and nothing
+else.
+
+### 11.4 `.dockerignore` — not optional
+
+⚠️ Without one, the build context includes your host's `bin/` and `obj/` directories. That bloats
+every build and can hand the container stale or wrong-architecture artifacts that make `restore`
+behave inexplicably. Exclude at least:
+
+```
+bin/
+obj/
+.git/
+docs/
+tests/
+.vs/
+**/appsettings.Development.json
+.env
+```
+
+Docker does **not** read `.gitignore`. This is a separate file that happens to overlap.
+
+### 11.5 Runtime hardening
+
+- **Run as non-root.** The aspnet images define an `APP_UID` — add `USER $APP_UID`. Chiseled images
+  are already non-root and have no shell at all, which removes `docker exec … sh` as a step in an
+  attack.
+- ⚠️ **The port is 8080, not 80.** Since .NET 8 the container images default to
+  `ASPNETCORE_HTTP_PORTS=8080`, precisely so the app can run as non-root (binding below 1024 needs
+  privilege). `EXPOSE 8080` and map accordingly. A compose file copied from an older tutorial with
+  `80:80` will just fail to connect, with no useful error.
+- ⚠️ **TLS terminates at the edge, not in the container.** §9 calls for HTTPS redirection and HSTS in
+  production, but behind a platform's proxy your app receives plain HTTP — so it would either
+  redirect-loop or set HSTS on a request it thinks is insecure. The fix is `UseForwardedHeaders`
+  (`XForwardedFor | XForwardedProto`) registered **before** the redirection middleware, so
+  `Request.Scheme` reflects the original client request. Middleware order is what makes this work.
+- **Healthcheck and start ordering.** Give the `api` service a healthcheck hitting `GET /health`
+  (§6), and depend on Mongo with `depends_on: mongo: condition: service_healthy`. Plain `depends_on`
+  waits only for the container to *start*, not for Mongo to accept connections — that difference is
+  why a stack works on your warm machine and fails on a cold one.
+- **Graceful shutdown already works.** `docker stop` sends SIGTERM and the generic host drains
+  in-flight requests (§8). Nothing to write; just know the default grace period is about 10 seconds.
+
+### 11.6 Secrets in containers
+
+⚠️ Never `COPY` a secrets file into the image and never bake `ENV Jwt__AccessSecret=…` into the
+Dockerfile. Both persist in the image layers and are readable by anyone who can pull the image —
+deleting them in a later layer does not remove them.
+
+Note also that `dotnet user-secrets` is a **development-only** mechanism tied to your user profile;
+it does not exist inside the container. So:
+
+- **Local containers:** Compose reads a gitignored `.env` via `env_file`.
+- **Production:** the hosting platform injects `Mongo__ConnectionString` and the `Jwt__*` variables
+  as environment variables (§2.6).
+
+### 11.7 Why the tests don't use Docker
+
+Now that Docker is here, it would be natural to point the integration tests at a real container. This
+roadmap deliberately doesn't: tests stay on **EphemeralMongo** (§12), so `dotnet test` and CI need no
+Docker daemon and pay no container startup cost on every run.
+
+The trade-off accepted is that tests run against EphemeralMongo's bundled `mongod` rather than the
+exact image Compose runs. If that difference ever causes a bug that only shows in production,
+**Testcontainers** is the swap — the test fixture changes, the tests themselves don't.
+
+---
+
+## 12. Extras Worth Including
 
 - **API docs:** the API publishes an OpenAPI document via `Microsoft.AspNetCore.OpenApi`, rendered by
   **Scalar** in Development. That document doubles as the source for a generated TypeScript client
@@ -714,15 +859,17 @@ Frontend changes needed:
   - _Unit_ tests for services — mock the repository interfaces with NSubstitute.
   - _Integration_ tests with `WebApplicationFactory<Program>` hitting the API in-process, backed by
     **EphemeralMongo** (a throwaway `mongod`, the `mongodb-memory-server` equivalent) so no real
-    database and no Docker are needed in CI.
+    database and no Docker are needed in CI. That is a deliberate choice, not an oversight — see
+    §11.7 for the trade-off and the escape hatch.
 - **CI (GitHub Actions):** `dotnet format --verify-no-changes` → `dotnet build` → `dotnet test` on
   every PR. Warnings-as-errors means the build step covers what a separate typecheck used to.
-- **Containerization:** a multi-stage `Dockerfile` (SDK image to build, ASP.NET runtime image to run)
-  plus `docker-compose.yml` with `api` + `mongo` for one-command local dev. Add `redis` only when §1.1
-  is revisited.
+- **Containerization:** covered in full in §11 — Compose for the dev database from Phase 0, a
+  multi-stage image for the API at Phase 5. Add `redis` only when §1.1 is revisited.
 - **Deployment:** host the API on Render / Railway / Fly.io / Azure App Service, with the database on
-  **MongoDB Atlas** (free tier). Set `Mongo__ConnectionString` and the `Jwt__*` secrets in the host's
-  dashboard.
+  **MongoDB Atlas** (free tier). With a `Dockerfile` present these platforms build and run *your*
+  image rather than guessing at a build from source, so what runs in production is what you tested
+  locally. The Compose `mongo` service is local-dev only — production points at Atlas. Set
+  `Mongo__ConnectionString` and the `Jwt__*` secrets in the host's dashboard.
 - **Observability:** `GET /health` reports Mongo reachability. Add error tracking (e.g. Sentry) and
   ship structured logs somewhere queryable.
 - **Future features:** email verification, password reset (token + email), instructor dashboards,
@@ -730,12 +877,17 @@ Frontend changes needed:
 
 ---
 
-## 12. Phased Milestone Roadmap
+## 13. Phased Milestone Roadmap
 
 Build in vertical slices — each phase ends with something runnable.
 
+> **This section is the overview — the phases and why they're ordered this way.** The day-by-day
+> version, sized for about an hour a session, is [BUILD_CHECKLIST.md](./BUILD_CHECKLIST.md). That is
+> the file you tick off; this one is what you re-read when you've lost the thread.
+
 ### Phase 0 — Setup & Foundation
 
+- [ ] `compose.yaml` with a `mongo` service, named volume, and healthcheck; `docker compose up -d mongo`
 - [ ] Solution + six projects, references wired inward only
 - [ ] `global.json`, `Directory.Build.props`, `.editorconfig`
 - [ ] Typed options bound from `appsettings.json` with `ValidateOnStart()`; secrets in user-secrets
@@ -778,7 +930,10 @@ Build in vertical slices — each phase ends with something runnable.
 ### Phase 5 — Ship
 
 - [ ] GitHub Actions CI (format / build / test)
-- [ ] Dockerfile + docker-compose (`api` + `mongo`)
+- [ ] `.dockerignore`, then a multi-stage `Dockerfile` with restore-layer caching (§11.3–11.4)
+- [ ] Non-root `USER $APP_UID`, `EXPOSE 8080`, `UseForwardedHeaders` for TLS at the edge (§11.5)
+- [ ] `api` service in `compose.yaml` under `profiles: [full]`, `depends_on: service_healthy`
+- [ ] Smoke test the stack: `docker compose --profile full up --build`, then `/health` and a course list
 - [ ] Deploy API + MongoDB Atlas; secrets set in the host dashboard
 - [ ] Point the frontend at the live API (`VITE_API_URL`), swap `courseService` + auth
 
@@ -786,7 +941,7 @@ Build in vertical slices — each phase ends with something runnable.
 
 ### Where to start
 
-Phase 0 top to bottom — nothing else can be tested until the app boots, connects to Mongo, and has
-its indexes. Then Phase 1: get a user able to register and log in against a real database with JWTs,
+Phase 0 top to bottom, starting with bringing Mongo up in a container — nothing else can be tested
+until a database answers, the app boots against it, and the indexes exist. Then Phase 1: get a user able to register and log in against a real database with JWTs,
 with refresh-token rotation and the logout denylist in place from the start, before touching courses.
 Courses (Phase 2) is where the cache-aside pattern gets exercised for the first time.

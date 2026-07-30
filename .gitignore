@@ -19,6 +19,9 @@ appsettings.Development.json
 appsettings.Local.json
 *.pfx
 
+# Compose reads container secrets from here (see roadmap §11.6)
+.env
+
 # Logs
 logs/
 *.log
@@ -33,6 +36,7 @@ coverage/
 .DS_Store
 Thumbs.db
 
-# Docs — the roadmap is the project spec and IS tracked; everything else here is scratch
+# Docs — the roadmap and checklist ARE tracked; everything else here is scratch
 docs/*
 !docs/BACKEND_ROADMAP.md
+!docs/BUILD_CHECKLIST.md
