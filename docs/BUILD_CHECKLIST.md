@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   ▢▢▢▢▢▢▢▢▢▢▢▢▢              0/13
+Phase 0  Setup & Foundation   x▢▢▢▢▢▢▢▢▢▢▢▢              1/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -45,7 +45,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 1 — Tools and the database container
 
-- [ ] **Do:** Confirm `dotnet --list-sdks` shows a 10.0.x entry and `docker compose version` works.
+- [x] **Do:** Confirm `dotnet --list-sdks` shows a 10.0.x entry and `docker compose version` works.
       Write `compose.yaml` with a single `mongo` service: pinned image tag, `27017:27017`, a named
       volume for `/data/db`, and a `healthcheck`. Bring it up with `docker compose up -d mongo`.
 - **Roadmap:** §2.1, §11.1, §11.2
