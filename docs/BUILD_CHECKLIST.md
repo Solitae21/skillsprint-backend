@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xx▢▢▢▢▢▢▢▢▢▢▢              2/13
+Phase 0  Setup & Foundation   xxx▢▢▢▢▢▢▢▢▢▢              3/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -69,7 +69,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 3 — Project references, pointing inward only
 
-- [ ] **Do:** Wire the references per §3: Application → Domain; Infrastructure → Application, Domain;
+- [x] **Do:** Wire the references per §3: Application → Domain; Infrastructure → Application, Domain;
       Api → Application, Infrastructure. Domain references nothing.
 - **Roadmap:** §3
 - **Concept:** Layering enforced by the compiler rather than by discipline. This is the whole reason
