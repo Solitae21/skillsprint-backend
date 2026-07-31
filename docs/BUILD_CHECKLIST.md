@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xxx▢▢▢▢▢▢▢▢▢▢              3/13
+Phase 0  Setup & Foundation   xxxx▢▢▢▢▢▢▢▢▢              4/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -82,7 +82,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 4 — Build configuration and formatting
 
-- [ ] **Do:** Add `global.json` pinning the SDK to 10.0.x, `Directory.Build.props` with `net10.0`,
+- [x] **Do:** Add `global.json` pinning the SDK to 10.0.x, `Directory.Build.props` with `net10.0`,
       nullable, implicit usings, and warnings-as-errors, and an `.editorconfig`. Run `dotnet format`.
 - **Roadmap:** §2.4
 - **Concept:** MSBuild property inheritance — `Directory.Build.props` is imported by every project
