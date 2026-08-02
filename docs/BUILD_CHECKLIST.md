@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xxxx▢▢▢▢▢▢▢▢▢              4/13
+Phase 0  Setup & Foundation   xxxxx▢▢▢▢▢▢▢▢              5/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -94,7 +94,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 5 — NuGet packages
 
-- [ ] **Do:** Add the packages from the §2.3 table to their respective projects.
+- [x] **Do:** Add the packages from the §2.3 table to their respective projects.
 - **Roadmap:** §2.3
 - **Concept:** Transitive dependencies — check what Domain ends up with (nothing) and why that
   matters for the guarantee you built on Day 3.

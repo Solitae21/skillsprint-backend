@@ -1,2 +1,12 @@
 <Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SkillSprint.Api/SkillSprint.Api.csproj" />
+    <Project Path="src/SkillSprint.Application/SkillSprint.Application.csproj" />
+    <Project Path="src/SkillSprint.Domain/SkillSprint.Domain.csproj" />
+    <Project Path="src/SkillSprint.Infrastructure/SkillSprint.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SkillSprint.IntegrationTests/SkillSprint.IntegrationTests.csproj" />
+    <Project Path="tests/SkillSprint.UnitTests/SkillSprint.UnitTests.csproj" />
+  </Folder>
 </Solution>
