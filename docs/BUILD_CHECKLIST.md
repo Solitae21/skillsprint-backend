@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xxxxx▢▢▢▢▢▢▢▢              5/13
+Phase 0  Setup & Foundation   xxxxxx▢▢▢▢▢▢▢              6/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -105,7 +105,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 6 — Typed options with startup validation
 
-- [ ] **Do:** Add `appsettings.json` with the settings surface from §2.6. Create a `MongoOptions`
+- [x] **Do:** Add `appsettings.json` with the settings surface from §2.6. Create a `MongoOptions`
       class and bind it with `.Bind(...).ValidateDataAnnotations().ValidateOnStart()`.
 - **Roadmap:** §2.6
 - **Concept:** The options pattern and `IOptions<T>` — configuration as an injected, typed object
