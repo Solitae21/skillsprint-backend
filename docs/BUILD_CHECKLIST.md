@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xxxxxx▢▢▢▢▢▢▢              6/13
+Phase 0  Setup & Foundation   xxxxxxx▢▢▢▢▢▢              7/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -117,7 +117,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 7 — Secrets
 
-- [ ] **Do:** `dotnet user-secrets init` on the Api project and set `Jwt:AccessSecret` and
+- [x] **Do:** `dotnet user-secrets init` on the Api project and set `Jwt:AccessSecret` and
       `Jwt:RefreshSecret` to two *different* long random strings. Add a `JwtOptions` class bound and
       validated the same way as Day 6.
 - **Roadmap:** §2.6

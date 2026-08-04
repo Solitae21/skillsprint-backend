@@ -1,5 +1,7 @@
 using SkillSprint.Infrastructure;
 
+using Microsoft.Extensions.Options;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -14,7 +16,17 @@ builder.Services
     .ValidateDataAnnotations()
     .ValidateOnStart();
 
+builder.Services
+.AddOptions<JwtOptions>()
+.Bind(builder.Configuration.GetSection("Jwt"))
+.ValidateDataAnnotations()
+.ValidateOnStart();
+
 var app = builder.Build();
+
+var jwt = app.Services.GetRequiredService<IOptions<JwtOptions>>().Value;
+app.Logger.LogInformation("Jwt:AccessSecret length = {Len}", jwt.AccessSecret.Length);
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
