@@ -40,3 +40,6 @@ Thumbs.db
 docs/*
 !docs/BACKEND_ROADMAP.md
 !docs/BUILD_CHECKLIST.md
+
+postman/
+.postman

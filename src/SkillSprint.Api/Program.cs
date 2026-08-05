@@ -37,6 +37,8 @@ builder.Services
 
 var app = builder.Build();
 
+app.MapGet("/temp-mongo-check", (MongoContext ctx) => ctx.Database.ListCollectionNames().ToList());
+
 var jwt = app.Services.GetRequiredService<IOptions<JwtOptions>>().Value;
 app.Logger.LogInformation("Jwt:AccessSecret length = {Len}", jwt.AccessSecret.Length);
 
