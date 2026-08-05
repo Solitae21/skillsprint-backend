@@ -1,6 +1,10 @@
 using SkillSprint.Infrastructure;
 
+using MongoDB.Driver;
+
 using Microsoft.Extensions.Options;
+
+MongoConventions.Register();
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +13,15 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
+
+builder.Services.AddSingleton<IMongoClient>(sp =>
+{
+    var options = sp.GetRequiredService<IOptions<MongoOptions>>().Value;
+    return new MongoClient(options.ConnectionString);
+});
+
+builder.Services.AddSingleton<MongoContext>();
+
 
 builder.Services
     .AddOptions<MongoOptions>()
