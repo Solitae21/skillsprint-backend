@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xxxxxxx▢▢▢▢▢▢              7/13
+Phase 0  Setup & Foundation   xxxxxxxx▢▢▢▢▢              8/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -130,7 +130,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 8 — MongoContext and BSON conventions
 
-- [ ] **Do:** Register `IMongoClient` as a **singleton** wrapped in a `MongoContext` exposing typed
+- [x] **Do:** Register `IMongoClient` as a **singleton** wrapped in a `MongoContext` exposing typed
       `IMongoCollection<T>` properties. Register the convention pack from §4.0 at startup.
 - **Roadmap:** §4.0, §2.6
 - **Concept:** DI lifetimes — the Mongo client is a singleton because it owns the connection pool;
