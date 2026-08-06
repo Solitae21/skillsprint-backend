@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xxxxxxxxx▢▢▢▢              9/13
+Phase 0  Setup & Foundation   xxxxxxxxxx▢▢▢              10/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -153,7 +153,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 10 — The index initializer
 
-- [ ] **Do:** Write a `MongoIndexInitializer` implementing `IHostedService` (or `BackgroundService`)
+- [x] **Do:** Write a `MongoIndexInitializer` implementing `IHostedService` (or `BackgroundService`)
       and register it. It can create nothing yet — each later phase adds its indexes here.
 - **Roadmap:** §4.4
 - **Concept:** Hosted services and the app lifetime — code that runs once at startup, before or

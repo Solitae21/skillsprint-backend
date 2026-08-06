@@ -21,6 +21,7 @@ builder.Services.AddSingleton<IMongoClient>(sp =>
 });
 
 builder.Services.AddSingleton<MongoContext>();
+builder.Services.AddHostedService<MongoIndexInitializer>();
 
 
 builder.Services
