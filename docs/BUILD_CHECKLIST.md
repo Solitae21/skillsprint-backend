@@ -29,7 +29,7 @@ turns a practice session into a transcription session.
 ## Progress
 
 ```
-Phase 0  Setup & Foundation   xxxxxxxx▢▢▢▢▢              8/13
+Phase 0  Setup & Foundation   xxxxxxxxx▢▢▢▢              9/13
 Phase 1  Authentication       ▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢▢           0/16
 Phase 2  Courses              ▢▢▢▢▢▢▢▢▢▢▢                0/11
 Phase 3  Enrollments          ▢▢▢▢▢▢                     0/6
@@ -142,7 +142,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 9 — Domain primitives
 
-- [ ] **Do:** Create the `MongoDocument` base class (Id + CreatedAt + UpdatedAt) and `AppException`
+- [x] **Do:** Create the `MongoDocument` base class (Id + CreatedAt + UpdatedAt) and `AppException`
       (status, code, message, details) in Domain.
 - **Roadmap:** §4.0, §8
 - **Concept:** Why Domain stays dependency-free — no `[Bson*]` attributes here; mapping is declared
