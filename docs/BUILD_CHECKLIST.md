@@ -165,7 +165,7 @@ Goal: an app that boots, connects to MongoDB, has its indexes, logs properly, an
 
 ### Day 11 — `GET /health`
 
-- [ ] **Do:** Add `AddHealthChecks()` with a check that pings MongoDB, and map `GET /health`.
+- [x] **Do:** Add `AddHealthChecks()` with a check that pings MongoDB, and map `GET /health`.
 - **Roadmap:** §6, §12
 - **Concept:** Liveness vs. readiness — "the process is up" and "the process can serve traffic" are
   different questions, and only the second one involves the database.
